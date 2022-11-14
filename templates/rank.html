@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <style>
+        .warp {
+            width: 100%;
+            height: auto;
+            margin-top: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+        .rank-box {
+            width: 95%;
+            max-width: 600px;
+        }
+
+        .right-form {
+            float: right;
+            clear: both;
+        }
+
+        .table {
+            text-align: center;
+        }
+
+        h3 {
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            data_get()
+        })
+
+        function test_add() {
+            let user_id = $('#user_id').val()
+            let score = $('#score').val()
+
+            let data = {'user_id': user_id, 'score': score}
+
+            $.ajax({
+                type: "POST",
+                url: "/test_post",
+                data: {data: JSON.stringify(data)},
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.reload()
+                }
+            });
+        }
+
+        function data_get() {
+            let rank_num = 1;
+            let rank_data;
+
+            $.ajax({
+                type: "GET",
+                url: "/rank/data/get",
+                data: {},
+                success: function (response) {
+                    rank_data = response['data'].sort(function (a, b) {
+                        return b.score - a.score;
+                    })
+
+                    for (i = 0; i < 3; i++) {
+                        $("#rank_table").append(`<tr>
+                <th>${rank_num}</th>
+                <td>${rank_data[i]['user_nickname']}</td>
+                <td>${rank_data[i]['score'].toLocaleString()}</td>
+            </tr>`);
+                        rank_num++
+                    }
+                }
+            });
+        }
+
+        function logout() {
+            $.removeCookie('mytoken');
+            alert('로그아웃!')
+            window.location.href = '/login'
+        }
+    </script>
+    <title>더 게임</title>
+
+</head>
+
+<body>
+<div class="warp">
+    <div class="test">
+        <h3>TEST</h3>
+        <div class="input-group mb-3">
+            <span class="input-group-text">ID</span> <input type="text" class="form-control" placeholder="user_id"
+                                                            id="user_id">
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">Score</span> <input type="text" class="form-control" placeholder="0"
+                                                               id="score">
+        </div>
+
+        <button type="button" class="btn btn-danger" onclick="test_add()">add</button>
+        <br>
+        <br>
+    </div>
+
+
+    <div class="rank-box">
+        <p>{{nickname}}님의 게임 점수는 <u>{{score}}점</u>입니다.</p>
+        <h3>순위</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">순위</th>
+                <th scope="col">닉네임</th>
+                <th scope="col">점수</th>
+            </tr>
+            </thead>
+            <tbody id="rank_table">
+
+            </tbody>
+        </table>
+    </div>
+    <div class="right-form">
+        <button type="button" class="btn btn-danger">다시하기</button>
+        <button type="button" class="btn btn-danger" onclick="logout()">로그아웃</button>
+    </div>
+</div>
+</body>
+
+</html>
